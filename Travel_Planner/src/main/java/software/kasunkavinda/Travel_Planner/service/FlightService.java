@@ -1,5 +1,6 @@
 package software.kasunkavinda.Travel_Planner.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +12,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import software.kasunkavinda.Travel_Planner.dto.*;
+import software.kasunkavinda.Travel_Planner.entity.Flights;
+import software.kasunkavinda.Travel_Planner.entity.Itineraries;
+import software.kasunkavinda.Travel_Planner.repository.FlightRepo;
+import software.kasunkavinda.Travel_Planner.repository.ItinerariesRepo;
 import software.kasunkavinda.Travel_Planner.util.FlightUtilities;
+import software.kasunkavinda.Travel_Planner.util.Mapping;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,10 +25,14 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class FlightService {
 
     private final FlightUtilities flightUtilities;
     private final RestTemplate restTemplate;
+    private final FlightRepo flightRepo;
+    private final ItinerariesRepo itinerariesRepo;
+    private final Mapping mapping;
 
     @Value("${amadeus.api.base_url}")
     private String baseUrl;
@@ -115,4 +125,49 @@ public class FlightService {
     }
 
 
+    public ResponseDto<FlightDto> saveFlightDetails(FlightDto flightDto) {
+        logger.info("Request received to save flight details.");
+
+        if (flightDto.getFlightCode() == null) {
+            logger.error("Flight ID is null");
+            return new ResponseDto<>(flightDto, "400","Flight ID is null");
+        }
+
+        Flights flight = flightRepo.findById(flightDto.getFlightCode()).orElse(null);
+        if (flight != null) {
+            logger.warn("Flight already exists with ID: {}", flightDto.getFlightCode());
+            return new ResponseDto<>(flightDto, "400", "Flight already exists");
+        }
+
+        Itineraries itineraries = itinerariesRepo.getReferenceById(flightDto.getItineraryId());
+        Flights flights = mapping.convertToEntity(flightDto, Flights.class);
+        flights.setItinerary(itineraries);
+        flightRepo.save(flights);
+        logger.info("Flight details saved successfully.");
+        return new ResponseDto<>(flightDto, "200", "Flight saved successfully");
+    }
+
+    public ResponseDto<FlightDto> getFlight(String flightCode) {
+        logger.info("Request received to get flight details.");
+        Flights flight = flightRepo.findById(flightCode).orElse(null);
+        if (flight == null) {
+            logger.error("Flight not found with ID: {}", flightCode);
+            return new ResponseDto<>(null, "400", "Flight not found");
+        }
+        logger.info("Flight details retrieved successfully.");
+
+        return new ResponseDto<>(mapping.convertToDto(flight, FlightDto.class), "200", "Flight details retrieved successfully");
+    }
+
+    public ResponseDto<String> deleteFlight(String flightCode) {
+        logger.info("Request received to delete flight details.");
+        Flights flight = flightRepo.findById(flightCode).orElse(null);
+        if (flight == null) {
+            logger.error("Flight not found with ID: {}", flightCode);
+            return new ResponseDto<>(flightCode, "400", "Flight not found");
+        }
+        flightRepo.deleteById(flightCode);
+        logger.info("Flight details deleted successfully.");
+        return new ResponseDto<>(flightCode, "200", "Flight details deleted successfully");
+    }
 }
