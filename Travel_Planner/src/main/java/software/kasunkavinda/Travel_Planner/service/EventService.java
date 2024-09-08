@@ -1,6 +1,8 @@
 package software.kasunkavinda.Travel_Planner.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -13,6 +15,7 @@ import software.kasunkavinda.Travel_Planner.util.LocationUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+
 
 @Service
 @RequiredArgsConstructor
@@ -29,8 +32,11 @@ public class EventService {
 
     private final LocationUtils locationUtils;
 
+    private final Logger logger = LoggerFactory.getLogger(EventService.class);
+
     public ResponseDto<EventResponseDto> getNearbyEvents(String location) throws JsonProcessingException {
 
+        logger.info("Getting events for {}", location);
         // Get location details
         LocationDto lCode = locationUtils.getLocation(location);
         double lat = lCode.getLat();
@@ -40,11 +46,13 @@ public class EventService {
 
         ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
 
+
         // Parse response
         EventResponseDto eventResponse = new EventResponseDto();
 
             JsonNode root = objectMapper.readTree(response.getBody());
             JsonNode eventsNode = root.path("_embedded").path("events");
+
 
             List<EventDto> events = new ArrayList<>();
             for (JsonNode eventNode : eventsNode) {
@@ -80,6 +88,7 @@ public class EventService {
             }
             eventResponse.setEvents(events);
 
+            logger.info("Events retrieved successfully.");
 
         return new ResponseDto<>(eventResponse, "Success", "Events for " + location);
     }
