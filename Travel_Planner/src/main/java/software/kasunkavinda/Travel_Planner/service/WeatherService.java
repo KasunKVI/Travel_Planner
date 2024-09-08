@@ -14,8 +14,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import software.kasunkavinda.Travel_Planner.dto.LocationDto;
+import software.kasunkavinda.Travel_Planner.dto.ResponseDto;
 import software.kasunkavinda.Travel_Planner.dto.WeatherDto;
-import software.kasunkavinda.Travel_Planner.util.WeatherUtils;
+import software.kasunkavinda.Travel_Planner.util.LocationUtils;
 
 import java.util.Objects;
 
@@ -26,7 +27,7 @@ public class WeatherService {
     @Value("${openweather.api.key}")
     private String apiKey;
 
-    private final WeatherUtils weatherUtils;
+    private final LocationUtils weatherUtils;
 
     private final RestTemplate restTemplate;
 
@@ -41,7 +42,7 @@ public class WeatherService {
         return weatherUtils.getLocation(location);
     }
 
-    public WeatherDto getWeather(String location) {
+    public ResponseDto<WeatherDto> getWeather(String location) {
         logger.info("Getting weather for {}", location);
         LocationDto locationDto = getLocation(location);
         String url = baseUrl + "lat=" + locationDto.getLat() + "&lon=" + locationDto.getLon() + "&appid=" + apiKey + "&units=metric";
@@ -77,7 +78,7 @@ public class WeatherService {
 
         // Map the data into WeatherDto
 
-        return new WeatherDto(
+        return new ResponseDto<>(new WeatherDto(
                 locationName,
                 country,
                 weatherMain,
@@ -93,6 +94,6 @@ public class WeatherService {
                 windDeg,
                 visibility,
                 icon
-        );
+        ), "Success", "Weather for " + location);
     }
 }
