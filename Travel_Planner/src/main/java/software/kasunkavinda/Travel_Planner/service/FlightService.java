@@ -139,7 +139,11 @@ public class FlightService {
             return new ResponseDto<>(flightDto, "400", "Flight already exists");
         }
 
-        Itineraries itineraries = itinerariesRepo.getReferenceById(flightDto.getItineraryId());
+        Itineraries itineraries = itinerariesRepo.findByIdAndStatus(flightDto.getItineraryId(),"active");
+        if (itineraries == null) {
+            logger.error("Itinerary not found with ID: {}", flightDto.getItineraryId());
+            return new ResponseDto<>(flightDto, "400", "Itinerary is not active");
+        }
         Flights flights = mapping.convertToEntity(flightDto, Flights.class);
         flights.setItinerary(itineraries);
         flightRepo.save(flights);
