@@ -1,5 +1,6 @@
 package software.kasunkavinda.Travel_Planner;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -12,8 +13,4 @@ public class TravelPlannerApplication {
 		SpringApplication.run(TravelPlannerApplication.class, args);
 	}
 
-	@Bean
-	public RestTemplate restTemplate() {
-		return new RestTemplate();
-	}
 }
