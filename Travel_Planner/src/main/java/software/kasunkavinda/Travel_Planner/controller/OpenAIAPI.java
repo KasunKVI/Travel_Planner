@@ -25,15 +25,23 @@ public class OpenAIAPI {
     }
 
     @GetMapping("/getRecommendations")
-    public ResponseEntity<ResponseDto<String>> getRecommendations(@RequestBody RecommendationDto recommendationDto) throws JsonProcessingException {
+    public ResponseEntity<ResponseDto<String>> getRecommendations(@RequestBody RecommendationDto recommendationDto) {
         logger.info("Request received to get recommendations.");
-        return new ResponseEntity<>(openAIService.getSuggestions(recommendationDto.getOrigin(), recommendationDto.getDestination()), HttpStatus.OK);
+        try {
+            return new ResponseEntity<>(openAIService.getSuggestions(recommendationDto.getOrigin(), recommendationDto.getDestination()), HttpStatus.OK);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @GetMapping("/chatBot")
-    public ResponseEntity<ResponseDto<String>> chatBot(@RequestParam String chat) throws JsonProcessingException {
+    public ResponseEntity<ResponseDto<String>> chatBot(@RequestParam String chat) {
         logger.info("Request received to get chat.");
-        return new ResponseEntity<>(openAIService.chatBot(chat), HttpStatus.OK);
+        try {
+            return new ResponseEntity<>(openAIService.chatBot(chat), HttpStatus.OK);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 

@@ -77,12 +77,12 @@ public class OpenAIService {
 
 
 
-    public ResponseDto<String> chatBot(String chat) {
+    public ResponseDto<String> chatBot(String chat) throws JsonProcessingException {
         logger.info("Request received to get chat.");
 
         // Call OpenAI API
         String url = "https://api.openai.com/v1/chat/completions";
-        String requestJson = String.format("{\"model\": \"gpt-3.5-turbo\", \"messages\": [{\"role\": \"system\", \"content\": \"You are a helpful assistant.\"}, {\"role\": \"user\", \"content\": \"%s\"}], \"max_tokens\": 50}", chat);
+        String requestJson = String.format("{\"model\": \"gpt-3.5-turbo\", \"messages\": [{\"role\": \"system\", \"content\": \"You are a helpful assistant.\"}, {\"role\": \"user\", \"content\": \"%s\"}], \"max_tokens\": 150}", chat+"limit your response to 150 characters");
 
         // Set the headers
         HttpHeaders headers = new HttpHeaders();
@@ -102,8 +102,7 @@ public class OpenAIService {
 
     }
 
-    private String extractChatResponse(String jsonResponse) {
-        try {
+    private String extractChatResponse(String jsonResponse) throws JsonProcessingException {
             JsonNode rootNode = objectMapper.readTree(jsonResponse);
             JsonNode choicesNode = rootNode.path("choices");
             if (choicesNode.isArray() && choicesNode.size() > 0) {
@@ -112,10 +111,6 @@ public class OpenAIService {
             } else {
                 return "No response content available.";
             }
-        } catch (Exception e) {
-            logger.error("Error processing JSON response", e);
-            return "Error processing response.";
-        }
     }
 }
 
