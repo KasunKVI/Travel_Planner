@@ -30,8 +30,12 @@ public class EventsAPI {
     }
 
     @GetMapping("/getEvents")
-    public ResponseEntity<ResponseDto<EventResponseDto>> getEvents(@RequestParam String location) throws JsonProcessingException {
+    public ResponseEntity<ResponseDto<EventResponseDto>> getEvents(@RequestParam String location) {
         logger.info("Request received to get events.");
-        return new ResponseEntity<>(eventsService.getNearbyEvents(location), HttpStatus.OK);
-   }
+        try {
+            return new ResponseEntity<>(eventsService.getNearbyEvents(location), HttpStatus.OK);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
