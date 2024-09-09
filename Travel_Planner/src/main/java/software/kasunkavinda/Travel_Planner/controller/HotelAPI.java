@@ -32,21 +32,33 @@ public class HotelAPI {
     }
 
     @GetMapping("/getHotels")
-    public ResponseEntity<ResponseDto<List<HotelDto>>> getHotels(@RequestParam String location) throws IOException {
+    public ResponseEntity<ResponseDto<List<HotelDto>>> getHotels(@RequestParam String location) {
         logger.info("Request received to get hotels.");
-        return new ResponseEntity<>(hotelService.getNearbyHotels(location), HttpStatus.OK);
+        try {
+            return new ResponseEntity<>(hotelService.getNearbyHotels(location), HttpStatus.OK);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @GetMapping("/getHotelReviews")
-    public ResponseEntity<ResponseDto<List<ReviewResponseDto>>> getHotelReviews(@RequestParam String locationId) throws IOException {
+    public ResponseEntity<ResponseDto<List<ReviewResponseDto>>> getHotelReviews(@RequestParam String locationId) {
         logger.info("Request received to get hotel reviews.");
-        return new ResponseEntity<>(hotelService.getHotelReviews(locationId), HttpStatus.OK);
+        try {
+            return new ResponseEntity<>(hotelService.getHotelReviews(locationId), HttpStatus.OK);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @GetMapping("/getHotelPhotos")
-    public ResponseEntity<ResponseDto<List<HotelPhotosDto>>> getHotelPhotos(@RequestParam String locationId) throws IOException {
+    public ResponseEntity<ResponseDto<List<HotelPhotosDto>>> getHotelPhotos(@RequestParam String locationId) {
         logger.info("Request received to get hotel photos.");
-        return new ResponseEntity<>(hotelService.getHotelPhotos(locationId), HttpStatus.OK);
+        try {
+            return new ResponseEntity<>(hotelService.getHotelPhotos(locationId), HttpStatus.OK);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @PostMapping("/save")
