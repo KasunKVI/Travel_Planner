@@ -206,7 +206,17 @@ public class HotelService {
     public ResponseDto<HotelDto> saveHotel(HotelDto hotelDto) {
         logger.info("Saving hotel: " + hotelDto.getName());
 
-        Itineraries itineraries = itinerariesRepo.getReferenceById(hotelDto.getItineraryId());
+        Hotels hotelExist = hotelRepo.findById(hotelDto.getLocation_id()).orElse(null);
+        if (hotelExist != null) {
+            logger.info("Hotel already exists");
+            return new ResponseDto<>(hotelDto, "400", "Hotel already exists");
+        }
+
+        Itineraries itineraries = itinerariesRepo.findByIdAndStatus(hotelDto.getItineraryId(), "active");
+        if (itineraries == null) {
+            logger.error("Itinerary not found with ID: {}", hotelDto.getItineraryId());
+            return new ResponseDto<>(hotelDto, "400", "Itinerary is not active");
+        }
         // Save the hotel to the database
         Hotels hotel = new Hotels();
         hotel.setName(hotelDto.getName());
@@ -243,6 +253,12 @@ public class HotelService {
 
     public ResponseDto<String> deleteHotel(String locationId) {
         logger.info("Deleting hotel with location ID: " + locationId);
+
+        Hotels hotel = hotelRepo.findById(locationId).orElse(null);
+        if (hotel == null) {
+            logger.error("Hotel not found with ID: {}", locationId);
+            return new ResponseDto<>(locationId, "400", "Hotel not found");
+        }
         hotelRepo.deleteById(locationId);
 
             return new ResponseDto<>(locationId, """
